@@ -9,6 +9,8 @@ The ppo lunar lander is a tensorflow implemetation of the PPO algorithm.
 
 The following are other implementations that helped me a lot with my own.
 
+![](LLgif.gif)
+
 ## Snake
 
 Will upload soon
