@@ -4,9 +4,7 @@ import pickle
 
 
 def run_genome_file(file,config_path):
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_path)
+    config = pickle.load(open(config_path,'rb'))
     genome = pickle.load(open(file, 'rb'))
     print(genome.fitness)
     net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -15,6 +13,6 @@ def run_genome_file(file,config_path):
 def replay_game_file(file):
     game = pickle.load(open(file,'rb'))
     game.replay(canvas_name=file)
-run_genome_file('Pong/neat_saves/best_gen_70.pkl',config_path = 'Pong/config')
+run_genome_file('Pong/neat_saves/best_gen_50.pkl',config_path = 'Pong/config/neat_saves/config')
 #replay_game_file('Pong/neat_saves/game_file_gen70.pkl')
 

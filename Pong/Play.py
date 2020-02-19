@@ -1,13 +1,16 @@
 import pygame, sys, os
 
-
 from pygame.locals import *
 from Pong import Game
 
-def play(game_length=5, difficulty=3):
+
+def play(game_length=None, game_time_limit=None, difficulty=3, fps = 60):
+    if game_time_limit:
+        seconds = game_time_limit//fps
+
     pygame.init()
 
-    game = Game(game_length=game_length)
+    game = Game(game_length=game_length, game_time_limit=game_time_limit)
 
     # canvas declaration
     window = pygame.display.set_mode((game.globals.WIDTH, game.globals.HEIGHT), 0, 32)
@@ -16,7 +19,9 @@ def play(game_length=5, difficulty=3):
     clock = pygame.time.Clock()
 
     game_over = False
+    counter = 0
     while game_over is False:
+        counter += 1
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 game.keydown(event)
@@ -27,11 +32,11 @@ def play(game_length=5, difficulty=3):
         game.computer_move(computer_speed=difficulty)
         game_over = game.update(log=True)
         game.display(window)
+        game.display_seconds(window,seconds = counter // fps)
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(fps)
     pygame.quit()
     return game
 
-game = play()
 
-game.replay()
+#game = play(game_time_limit=1000)

@@ -1,3 +1,9 @@
+
+# coding: utf-8
+
+# In[1]:
+
+
 # PONG pygame
 
 
@@ -6,6 +12,10 @@ import pygame
 from pygame.locals import *
 import pickle
 import warnings
+
+import tensorflow as tf
+import numpy as np
+import os
 
 # colors
 WHITE = (255, 255, 255)
@@ -26,7 +36,9 @@ class Game:
         # trackers and variables
         self.score1 = self.score2 = 0
         self.saves = 0
-        self.neat_actions = []
+        self.paddle1moves = []
+        self.paddle2moves = []
+
         self.t = 0  # timestep
 
         # game log tracks the position of paddles and ball at each frame so we can recreate.
@@ -125,8 +137,7 @@ class Game:
         return paddle1, paddle2
 
     def update(self, log=False):
-        if log:
-            self.log()
+        if log: self.log()
         self.ball.move()
         self.paddle1.move()
         self.paddle2.move()
@@ -176,9 +187,13 @@ class Game:
         elif self.ball.y >= self.paddle2.y:
             self.paddle2.vy = 1 * computer_speed
 
-    def neat_move(self, action, speed):
+    def paddle1move(self, action, speed):
         self.paddle1.vy = action * speed
-        self.neat_actions.append(action)
+        self.paddle1moves.append(action)
+        
+    def paddle2move(self, action, speed):
+        self.paddle2.vy = action * speed
+        self.paddle2moves.append(action)
 
     def keydown(self, event):
         if event.key == K_UP:
@@ -272,8 +287,7 @@ class Ball:
             self.vy = -1 * self.vy  # invert vy
 
         # PADDLE 1 LEFT PADDLE
-        if self.x - self.radius <= self.game.paddle1.x + self.globals.HALF_PAD_WIDTH and \
-                self.y in range(self.game.paddle1.y - self.globals.HALF_PAD_HEIGHT,
+        if self.x - self.radius <= self.game.paddle1.x + self.globals.HALF_PAD_WIDTH and                 self.y in range(self.game.paddle1.y - self.globals.HALF_PAD_HEIGHT,
                                 self.game.paddle1.y + self.globals.HALF_PAD_HEIGHT - 1,
                                 1):
 
@@ -291,8 +305,7 @@ class Ball:
             self.reset(direction='left')
 
         # paddle 2 RIGHT PADDLE
-        if self.x + self.radius >= self.globals.WIDTH + 1 - self.globals.HALF_PAD_WIDTH and \
-                self.y in range(self.game.paddle2.y - self.globals.HALF_PAD_HEIGHT,
+        if self.x + self.radius >= self.globals.WIDTH + 1 - self.globals.HALF_PAD_WIDTH and                 self.y in range(self.game.paddle2.y - self.globals.HALF_PAD_HEIGHT,
                                 self.game.paddle2.y + self.globals.HALF_PAD_HEIGHT - 1,
                                 1):
 
@@ -369,3 +382,78 @@ class Globals:
     CENTRE = [HALF_PAD_WIDTH, HALF_PAD_HEIGHT]
 
     SPEED = 5
+
+
+# In[2]:
+
+
+class Env():
+    def __init__(self, game_length=10, pcspeed=3, state_lookback = 3):
+        self.game_length = game_length
+        self.computer_speed = pcspeed
+        self.player_speed = pcspeed
+        self.state_lookback = state_lookback
+        self.reset()
+    
+    
+    
+    def reset(self):
+        self.actions_taken = []
+        self.game = Game(game_length=self.game_length)
+        self.step_n = 0
+        self.save_count = self.previous_save_count = 0
+        self.score_count = self.previous_score_count = 0
+        self.r = 0
+        self.__reset_state_memory()
+        return self.get_state()
+        
+    def __reset_state_memory(self):
+        s = self.__get_current_state()
+        shape = s.shape
+        self.state_memory = np.zeros((s.shape[0],self.state_lookback))
+        self.state_memory[:,0] = s
+        
+    def get_state(self):
+        return self.state_memory.flatten()[None,:]
+    
+    def __update_state_memory(self):
+        state = self.__get_current_state()
+        self.state_memory[:,1:] = self.state_memory[:,:-1]
+        self.state_memory[:,0] = state
+        
+    def check_save(self):
+        self.save_count = self.game.paddle1.saves
+        if self.save_count > self.previous_save_count:
+            self.previous_save_count = self.save_count
+            return True
+        else:
+            return False
+        
+    def __get_current_state(self):
+        return np.array([
+            self.game.ball.x,
+            self.game.ball.y,
+            self.game.paddle1.x,
+            self.game.paddle1.y
+        ])
+    
+    def step(self,a,display=False):
+        self.actions_taken.append(a)
+        self.game.paddle1move(a,self.player_speed)
+        self.game.computer_move(self.computer_speed)
+        done = self.game.update()
+        save_reward = 1 if self.check_save() else 0
+        if done:
+            if self.game.paddle1.score > self.game.paddle2.score:
+                win_reward = 10
+            else:
+                win_reward = 0
+            reward = win_reward + save_reward
+        else:
+            reward = save_reward
+        self.__update_state_memory()
+        s = self.get_state()
+        
+        return s, reward, done, {}
+        
+        

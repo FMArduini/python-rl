@@ -75,23 +75,6 @@ def get_fitness(game, game_length, penalise_nomoves, penalise_oscillation, penal
     return fitness
 
 
-#
-# def get_fitness(game, penalise_nomoves, penalise_oscillation, penalise_fitness, penalise_weight = 0.2):
-#     fitness = game.paddle1.saves
-#     if penalise_nomoves:
-#         fitness = fitness * np.std(game.neat_actions)  # this std is at best 1 and worst 0.
-#
-#     if penalise_oscillation:
-#         positions = [i['y'] for i in game.paddle1.position_log]
-#         hist_data = np.array(list(Counter(positions).values())) / len(positions)
-#         fitness = 0 if np.any(hist_data>0.4) else fitness
-#
-#     if penalise_fitness:
-#         fitness = fitness - (game.paddle2.saves + 1)*penalise_weight
-#
-#     return fitness
-
-
 def eval_genomes(genomes, config):
     # Play game and get results
     idx, genomes = zip(*genomes)
@@ -152,12 +135,16 @@ def check_runtime(config):
     if not os.path.isdir(config.save_folder):
         raise RuntimeError("save folder does not exist: {}".format(config.save_folder))
 
+    if not config.game_time_limit and not config.game_length:
+        raise RuntimeError("No end mechanism setup. either game length or game time limit args must be set.")
+
 
 def run_neat(
         n_generations=10,
         pop_size=10,
         save_every=10,
-        game_length=3,
+        game_length=None,
+        game_time_limit = None,
         runs_per_net=1,
         play_every=None,
         computer_paddle_speed=3,
@@ -190,6 +177,7 @@ def run_neat(
 
     # simulation properties
     config.game_length = game_length
+    config.game_time_limit = game_time_limit
     config.computer_paddle_speed = computer_paddle_speed
 
     check_runtime(config)
