@@ -2,8 +2,6 @@
 
 This repository serves as a home for my work and experiments on reinforcement learning algos.
 
-# PPO 
-
 ## Lunar Lander
 The [ppo lunar lander](https://github.com/FMArduini/python-rl/blob/master/LunarLanderPPO%20(v1).ipynb) is my own tensorflow implemetation of the PPO algorithm.
 
