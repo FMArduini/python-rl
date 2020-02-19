@@ -52,14 +52,24 @@ def run_many(n, model, env):
 # for now we use a bigger image.
 
 model = PPO2(CnnPolicy, env, verbose=0, gamma=0.9)
+t = int(time.time())
+latest_save_file = 'models/ppo_{}_latest'.format(t)
+best_save_file = 'models/ppo_{}_best'.format(t)
+
+best_score = -99999
 try:
     for i in range(1000):
         model.learn(total_timesteps=10000)
         runs = run_many(100, model, env)
+        mean = np.mean(runs)
         print("Iter: {}; Mean R: {}, std: {}, max: {}".format(i, np.mean(runs), np.std(runs), np.max(runs)))
+        model.save(save_path=latest_save_file)
+        if mean > best_score:
+            best_score = mean
+            model.save(save_path=best_save_file)
 
 except KeyboardInterrupt:
     print('Manual stop.')
 finally:
-    print("Saving model")
-    model.save(save_path='models/ppo_model_{}'.format(int(time.time())))
+    print("Saving latest model")
+    model.save(save_path=latest_save_file)

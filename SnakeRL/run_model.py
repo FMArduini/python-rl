@@ -20,13 +20,13 @@ print('done')
 # Instantiate the env
 #
 # Define and Train the agent
-model = PPO2(CnnPolicy, env, verbose=1)
+# model = PPO2(CnnPolicy, env, verbose=1)
 import os
-modellist = os.listdir('models')
+modellist = [i for i in os.listdir('models') if 'best' in i]
 print(modellist)
-latest = max([int(i.replace('ppo_model_','').replace('.zip','')) for i in modellist])
-m = 'models/ppo_model_{}.zip'.format(latest)
-model.load(load_path=m)
+latest = max([int(i.replace('ppo_','').replace('_best.zip','')) for i in modellist])
+m = 'models/ppo_{}_best.zip'.format(latest)
+model = PPO2.load(load_path=m)
 print('loaded',m)
 
 done = False
@@ -37,8 +37,8 @@ while not done:
     action = model.predict(observation=state)[0]
     state, reward, done, info = env.step(action)
     R += reward
-    print(action,reward,done)
-    time.sleep(0.7)
+    print('\n\n')
+    print('Running reward',R)
+    time.sleep(0.5)
 
-print('final reward', R)
 

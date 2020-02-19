@@ -5,7 +5,7 @@ This repository serves as a home for my work and experiments on reinforcement le
 # PPO 
 
 ## Lunar Lander
-The [ppo lunar lander](https://github.com/FMArduini/python-rl/blob/master/LunarLanderPPO%20(v1).ipynb) is a tensorflow implemetation of the PPO algorithm.
+The [ppo lunar lander](https://github.com/FMArduini/python-rl/blob/master/LunarLanderPPO%20(v1).ipynb) is my own tensorflow implemetation of the PPO algorithm.
 
 ![](LLgif.gif)
 
@@ -19,6 +19,8 @@ The [ppo lunar lander](https://github.com/FMArduini/python-rl/blob/master/LunarL
 ## Snake
 
 Created my own environment for snake [gym-snake] as a gym registered environment. Solved with stable baselines.
+
+![](snakeRL.gif)
 
 See the Readme in [SnakeRl](https://github.com/FMArduini/python-rl/tree/master/SnakeRL) folder.
 
