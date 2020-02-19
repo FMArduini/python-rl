@@ -20,7 +20,7 @@ The ppo lunar lander is a tensorflow implemetation of the PPO algorithm.
 
 Created my own environment for snake [gym-snake] as a gym registered environment. Solved with stable baselines.
 
-See readme in SnakeRL folder.
+See the Readme in [SnakeRl](https://github.com/FMArduini/python-rl/tree/master/SnakeRL) folder.
 
 
 
